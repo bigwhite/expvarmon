@@ -1,4 +1,4 @@
-module github.com/divan/expvarmon
+module github.com/bigwhite/expvarmon
 
 require (
 	github.com/antonholmquist/jason v1.0.0
@@ -8,3 +8,5 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/pyk/byten v0.0.0-20140925233358-f847a130bf6d
 )
+
+go 1.16
