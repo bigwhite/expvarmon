@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
@@ -27,20 +30,46 @@ type Service struct {
 	Err           error
 	Restarted     bool
 	UptimeCounter int64
+
+	// for serializing the data
+	// controlled by cmd option: serialize
+	f *os.File
+	w *csv.Writer // csv writer
 }
 
 // NewService returns new Service object.
 func NewService(url url.URL, vars []VarName) *Service {
+	fmt.Printf("---new service: url:[%#v], vars:[%v]\n", url, vars)
 	values := make(map[VarName]*Stack)
 	for _, name := range vars {
 		values[VarName(name)] = NewStack()
 	}
 
-	return &Service{
-		Name: url.Host, // we have only port on start, so use it as name until resolved
-		URL:  url,
-
+	s := &Service{
+		Name:   url.Host, // we have only port on start, so use it as name until resolved
+		URL:    url,
 		stacks: values,
+	}
+
+	f, err := os.Create(s.Name)
+	if err != nil {
+		panic(err)
+	}
+
+	if *serialize {
+		s.f = f
+		s.w = csv.NewWriter(f)
+	}
+
+	return s
+}
+
+// Close does some cleanup before service exit
+func (s *Service) Close() {
+	if *serialize {
+		if s.f != nil {
+			s.f.Close()
+		}
 	}
 }
 

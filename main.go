@@ -12,12 +12,13 @@ import (
 )
 
 var (
-	interval = flag.Duration("i", 5*time.Second, "Polling interval")
-	urls     = flag.String("ports", "", "Ports/URLs for accessing services expvars (start-end,port2,port3,https://host:port)")
-	varsArg  = flag.String("vars", "mem:memstats.Alloc,mem:memstats.Sys,mem:memstats.HeapAlloc,mem:memstats.HeapInuse,duration:memstats.PauseNs,duration:memstats.PauseTotalNs", "Vars to monitor (comma-separated)")
-	dummy    = flag.Bool("dummy", false, "Use dummy (console) output")
-	self     = flag.Bool("self", false, "Monitor itself")
-	endpoint = flag.String("endpoint", DefaultEndpoint, "URL endpoint for expvars")
+	interval  = flag.Duration("i", 5*time.Second, "Polling interval")
+	urls      = flag.String("ports", "", "Ports/URLs for accessing services expvars (start-end,port2,port3,https://host:port)")
+	varsArg   = flag.String("vars", "mem:memstats.Alloc,mem:memstats.Sys,mem:memstats.HeapAlloc,mem:memstats.HeapInuse,duration:memstats.PauseNs,duration:memstats.PauseTotalNs", "Vars to monitor (comma-separated)")
+	dummy     = flag.Bool("dummy", false, "Use dummy (console) output")
+	self      = flag.Bool("self", false, "Monitor itself")
+	endpoint  = flag.String("endpoint", DefaultEndpoint, "URL endpoint for expvars")
+	serialize = flag.Bool("w", false, "Serialize the data into a disk file")
 )
 
 func main() {
@@ -103,7 +104,14 @@ func UpdateAll(ui UI, data *UIData) {
 
 	data.LastTimestamp = time.Now()
 
+	fmt.Printf("====%#v\n", data.Vars)
 	ui.Update(*data)
+	service := data.Services[0]
+	var values []string
+	for _, name := range data.Vars {
+		values = append(values, service.Value(name))
+	}
+	fmt.Printf("====%#v\n", values)
 }
 
 // Usage reimplements flag.Usage

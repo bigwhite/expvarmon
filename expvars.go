@@ -51,6 +51,7 @@ func FetchExpvar(u url.URL) (*Expvar, error) {
 		return e, err
 	}
 	e = expvar
+	//fmt.Printf("%#v\n", *(e.Object))
 	return e, nil
 }
 
