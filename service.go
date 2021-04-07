@@ -51,12 +51,11 @@ func NewService(url url.URL, vars []VarName) *Service {
 		stacks: values,
 	}
 
-	f, err := os.Create(s.Name)
-	if err != nil {
-		panic(err)
-	}
-
 	if *serialize {
+		f, err := os.Create(s.Name)
+		if err != nil {
+			panic(err)
+		}
 		s.f = f
 		s.w = csv.NewWriter(f)
 	}

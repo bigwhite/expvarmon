@@ -84,6 +84,10 @@ func main() {
 			UpdateAll(ui, data)
 		case e := <-termui.PollEvents():
 			if e.Type == termui.KeyboardEvent && e.ID == "q" {
+				// program exit
+				for _, service := range data.Services {
+					service.Close()
+				}
 				return
 			}
 			if e.Type == termui.ResizeEvent {
