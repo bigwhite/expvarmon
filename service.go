@@ -54,7 +54,7 @@ func NewService(url url.URL, vars []VarName) *Service {
 	}
 
 	if *serialize {
-		f, err := os.Create(s.Name)
+		f, err := os.Create(s.Name + ".csv")
 		if err != nil {
 			panic(err)
 		}
