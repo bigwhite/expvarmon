@@ -108,14 +108,7 @@ func UpdateAll(ui UI, data *UIData) {
 
 	data.LastTimestamp = time.Now()
 
-	fmt.Printf("====%#v\n", data.Vars)
 	ui.Update(*data)
-	service := data.Services[0]
-	var values []string
-	for _, name := range data.Vars {
-		values = append(values, service.Value(name))
-	}
-	fmt.Printf("====%#v\n", values)
 }
 
 // Usage reimplements flag.Usage

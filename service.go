@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"net/url"
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/antonholmquist/jason"
 )
@@ -24,6 +24,7 @@ type Service struct {
 	URL     url.URL
 	Name    string
 	Cmdline string
+	vars    []VarName
 
 	stacks map[VarName]*Stack
 
@@ -39,7 +40,7 @@ type Service struct {
 
 // NewService returns new Service object.
 func NewService(url url.URL, vars []VarName) *Service {
-	fmt.Printf("---new service: url:[%#v], vars:[%v]\n", url, vars)
+	//fmt.Printf("---new service: url:[%#v], vars:[%v]\n", url, vars)
 	values := make(map[VarName]*Stack)
 	for _, name := range vars {
 		values[VarName(name)] = NewStack()
@@ -49,6 +50,7 @@ func NewService(url url.URL, vars []VarName) *Service {
 		Name:   url.Host, // we have only port on start, so use it as name until resolved
 		URL:    url,
 		stacks: values,
+		vars:   vars,
 	}
 
 	if *serialize {
@@ -58,6 +60,14 @@ func NewService(url url.URL, vars []VarName) *Service {
 		}
 		s.f = f
 		s.w = csv.NewWriter(f)
+
+		// write first record: category line
+		record := []string{"time"}
+		for _, v := range vars {
+			record = append(record, string(v))
+		}
+		s.w.Write(record)
+		s.w.Flush()
 	}
 
 	return s
@@ -116,6 +126,17 @@ func (s *Service) Update(wg *sync.WaitGroup) {
 		if v != nil {
 			stack.Push(v)
 		}
+	}
+
+	if *serialize {
+		// serialize the values  to csv
+		tm := time.Now().Format("2006-01-02 15:04:05")
+		values := []string{tm}
+		for _, name := range s.vars {
+			values = append(values, s.Value(name))
+		}
+		s.w.Write(values)
+		s.w.Flush()
 	}
 }
 
