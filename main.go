@@ -59,6 +59,13 @@ func main() {
 		data.Services = append(data.Services, service)
 	}
 
+	defer func() {
+		// close service before program exit
+		for _, service := range data.Services {
+			service.Close()
+		}
+	}()
+
 	// Start proper UI
 	var ui UI
 	if len(data.Services) > 1 {
@@ -84,10 +91,6 @@ func main() {
 			UpdateAll(ui, data)
 		case e := <-termui.PollEvents():
 			if e.Type == termui.KeyboardEvent && e.ID == "q" {
-				// program exit
-				for _, service := range data.Services {
-					service.Close()
-				}
 				return
 			}
 			if e.Type == termui.ResizeEvent {
